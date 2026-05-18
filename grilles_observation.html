@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grilles d'Observation des Pratiques Professionnelles</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f9f6f0;
+    --ink: #1a1a2e;
+    --accent: #c0392b;
+    --accent2: #2980b9;
+    --accent3: #27ae60;
+    --accent4: #8e44ad;
+    --muted: #6b6b7b;
+    --border: #e2ddd6;
+    --card-bg: #ffffff;
+    --score-0: #f8d7da;
+    --score-1: #fde9c4;
+    --score-2: #fff3cd;
+    --score-3: #d4edda;
+    --score-4: #c3e6cb;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(26,26,46,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 40px 5vw 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -80px;
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    background: rgba(192,57,43,0.18);
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 10%;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(41,128,185,0.13);
+    pointer-events: none;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+  }
+  header p {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.6);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* IDENTITY CARD */
+  .identity-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 32px;
+    margin: 32px 5vw 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+  }
+  @media(max-width:640px){ .identity-card { grid-template-columns:1fr; } }
+  .id-field label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .id-field input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--border);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--ink);
+    padding: 6px 0;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .id-field input:focus { border-color: var(--accent); }
+
+  /* TABS NAV */
+  .tabs-nav {
+    display: flex;
+    gap: 4px;
+    margin: 32px 5vw 0;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    background: var(--card-bg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { border-color: currentColor; color: var(--ink); }
+  .tab-btn.active[data-grille="1"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tab-btn.active[data-grille="2"] { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .tab-btn.active[data-grille="3"] { background: var(--accent3); border-color: var(--accent3); color: #fff; }
+  .tab-btn.active[data-grille="4"] { background: var(--accent4); border-color: var(--accent4); color: #fff; }
+  .tab-btn.active[data-grille="synthese"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  /* GRILLE PANELS */
+  .panel { display: none; margin: 20px 5vw 40px; }
+  .panel.active { display: block; }
+
+  .grille-header {
+    padding: 22px 28px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .g1 .grille-header { background: var(--accent); }
+  .g2 .grille-header { background: var(--accent2); }
+  .g3 .grille-header { background: var(--accent3); }
+  .g4 .grille-header { background: var(--accent4); }
+  .grille-header .g-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    opacity: 0.3;
+    line-height: 1;
+  }
+  .grille-header .g-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .grille-header .g-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 3px;
+  }
+
+  .grille-body {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  /* SECTION */
+  .section-title {
+    padding: 12px 28px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    background: #f3f2ef;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* INDICATOR ROW */
+  .indicator-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: start;
+    gap: 16px;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .indicator-row:hover { background: #fafafa; }
+  .indicator-row:last-child { border-bottom: none; }
+  .ind-label {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--ink);
+    padding-top: 4px;
+  }
+  .ind-code {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: .04em;
+    white-space: nowrap;
+    padding-top: 6px;
+  }
+  .score-select-wrap { display: flex; align-items: center; gap: 4px; }
+  .score-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .score-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .score-btn.sel[data-v="0"] { background: #e74c3c; border-color: #e74c3c; color: #fff; }
+  .score-btn.sel[data-v="1"] { background: #e67e22; border-color: #e67e22; color: #fff; }
+  .score-btn.sel[data-v="2"] { background: #f1c40f; border-color: #f1c40f; color: var(--ink); }
+  .score-btn.sel[data-v="3"] { background: #27ae60; border-color: #27ae60; color: #fff; }
+  .score-btn.sel[data-v="4"] { background: #1abc9c; border-color: #1abc9c; color: #fff; }
+
+  /* REMARKS */
+  .remarks-row {
+    padding: 0 28px 14px;
+    display: none;
+  }
+  .remarks-row.open { display: block; }
+  .remarks-row textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    resize: vertical;
+    min-height: 56px;
+    outline: none;
+    color: var(--ink);
+    background: #fafafa;
+    transition: border-color .2s;
+  }
+  .remarks-row textarea:focus { border-color: var(--accent); }
+
+  /* GRILLE FOOTER SCORE */
+  .grille-footer {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 4px;
+  }
+  .score-bar-wrap { flex: 1; min-width: 200px; }
+  .score-bar-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
+  .score-bar-track {
+    height: 10px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width .4s ease;
+  }
+  .g1 .score-bar-fill { background: var(--accent); }
+  .g2 .score-bar-fill { background: var(--accent2); }
+  .g3 .score-bar-fill { background: var(--accent3); }
+  .g4 .score-bar-fill { background: var(--accent4); }
+  .score-badge {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  .score-badge span { font-size: 0.9rem; color: var(--muted); font-family: 'DM Sans', sans-serif; font-weight: 400; }
+  .g1 .score-badge { color: var(--accent); }
+  .g2 .score-badge { color: var(--accent2); }
+  .g3 .score-badge { color: var(--accent4); }
+  .g4 .score-badge { color: var(--accent4); }
+
+  /* LEGENDE */
+  .legende {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    padding: 0 4px;
+  }
+  .leg-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.75rem; color: var(--muted);
+  }
+  .leg-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+
+  /* SYNTHESE */
+  .synthese-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+  @media(max-width: 640px){ .synthese-grid { grid-template-columns: 1fr; } }
+  .syn-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .syn-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    margin-bottom: 16px;
+  }
+  .syn-card.g1 h3 { color: var(--accent); }
+  .syn-card.g2 h3 { color: var(--accent2); }
+  .syn-card.g3 h3 { color: var(--accent3); }
+  .syn-card.g4 h3 { color: var(--accent4); }
+  .syn-score-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .syn-card.g1 .syn-score-big { color: var(--accent); }
+  .syn-card.g2 .syn-score-big { color: var(--accent2); }
+  .syn-card.g3 .syn-score-big { color: var(--accent3); }
+  .syn-card.g4 .syn-score-big { color: var(--accent4); }
+  .syn-out-of { font-size: 0.9rem; color: var(--muted); margin-left: 4px; }
+  .syn-bar-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .syn-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width .5s ease;
+  }
+  .syn-card.g1 .syn-bar-fill { background: var(--accent); }
+  .syn-card.g2 .syn-bar-fill { background: var(--accent2); }
+  .syn-card.g3 .syn-bar-fill { background: var(--accent3); }
+  .syn-card.g4 .syn-bar-fill { background: var(--accent4); }
+  .syn-fields { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .syn-fields label { font-size: 0.72rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .syn-fields textarea {
+    width: 100%;
+    min-height: 60px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    resize: vertical;
+    outline: none;
+    color: var(--ink);
+    background: #fafafa;
+  }
+
+  .total-card {
+    background: var(--ink);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    margin-top: 8px;
+  }
+  .total-label { font-size: 0.8rem; letter-spacing: .1em; text-transform: uppercase; opacity: 0.6; }
+  .total-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 8px 0 4px;
+  }
+  .total-out { font-size: 1rem; opacity: 0.5; }
+  .total-pct { font-size: 1.1rem; opacity: 0.7; margin-top: 4px; }
+
+  /* PRINT BTN */
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin: 16px 5vw 0;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 11px 24px;
+    border-radius: 50px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+  }
+  .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-secondary { background: var(--card-bg); color: var(--ink); border: 2px solid var(--border); }
+
+  /* NOTES LEGEND */
+  .scale-info {
+    margin: 0 5vw 28px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .scale-info strong { color: var(--ink); }
+  .scale-pill {
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.72rem;
+  }
+
+  @media print {
+    .tabs-nav, .actions { display: none !important; }
+    .panel { display: block !important; page-break-after: always; }
+    body { background: white; }
+    header { background: var(--ink) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Grilles d'observation des pratiques professionnelles</h1>
+  <p>Outil d'évaluation pour l'observation des enseignants — 4 dimensions · 160 points</p>
+</header>
+
+<!-- Identity -->
+<div class="identity-card">
+  <div class="id-field">
+    <label>Nom de l'observateur</label>
+    <input type="text" id="observateur" placeholder="Prénom Nom" oninput="updateSyntheseHeader()">
+  </div>
+  <div class="id-field">
+    <label>Nom de l'observé(e)</label>
+    <input type="text" id="observe" placeholder="Prénom Nom" oninput="updateSyntheseHeader()">
+  </div>
+  <div class="id-field">
+    <label>Date de restitution</label>
+    <input type="date" id="date_restitution" oninput="updateSyntheseHeader()">
+  </div>
+</div>
+
+<!-- Actions -->
+<div class="actions">
+  <button class="btn btn-primary" onclick="window.print()">🖨 Imprimer / Exporter PDF</button>
+  <button class="btn btn-secondary" onclick="resetAll()">↺ Réinitialiser</button>
+</div>
+
+<!-- Scale info -->
+<div class="scale-info" style="margin-top:20px">
+  <strong>Échelle :</strong>
+  <span class="scale-pill" style="background:#fde8e8;color:#c0392b">0 Absent</span>
+  <span class="scale-pill" style="background:#fde9c4;color:#d35400">1 Insuffisant</span>
+  <span class="scale-pill" style="background:#fff3cd;color:#b7950b">2 Partiel</span>
+  <span class="scale-pill" style="background:#d5f5e3;color:#1e8449">3 Satisfaisant</span>
+  <span class="scale-pill" style="background:#a9dfbf;color:#196f3d">4 Excellent</span>
+</div>
+
+<!-- Tabs -->
+<div class="tabs-nav">
+  <button class="tab-btn active" data-grille="1" onclick="showTab(1)">① Pédagogique</button>
+  <button class="tab-btn" data-grille="2" onclick="showTab(2)">② Didactique</button>
+  <button class="tab-btn" data-grille="3" onclick="showTab(3)">③ Relationnelle</button>
+  <button class="tab-btn" data-grille="4" onclick="showTab(4)">④ Personnelle</button>
+  <button class="tab-btn" data-grille="synthese" onclick="showTab('synthese')">📊 Synthèse</button>
+</div>
+
+<!-- GRILLE 1 -->
+<div class="panel g1 active" id="panel-1">
+  <div class="grille-header">
+    <div class="g-num">1</div>
+    <div>
+      <div class="g-title">Dimension Pédagogique</div>
+      <div class="g-subtitle">Organisation et conduite de la séance d'enseignement</div>
+    </div>
+  </div>
+  <div class="grille-body" id="body-1"></div>
+  <div class="grille-footer g1">
+    <div class="score-bar-wrap">
+      <div class="score-bar-label">Progression — <span id="pct-1">0</span>%</div>
+      <div class="score-bar-track"><div class="score-bar-fill" id="bar-1" style="width:0%"></div></div>
+    </div>
+    <div class="score-badge g1"><span id="score-1">0</span><span> / 68</span></div>
+  </div>
+  <div class="legende">
+    <div class="leg-item"><div class="leg-dot" style="background:#e74c3c"></div>0 Absent</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e67e22"></div>1 Insuffisant</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#f1c40f"></div>2 Partiel</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#27ae60"></div>3 Satisfaisant</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#1abc9c"></div>4 Excellent</div>
+  </div>
+</div>
+
+<!-- GRILLE 2 -->
+<div class="panel g2" id="panel-2">
+  <div class="grille-header">
+    <div class="g-num">2</div>
+    <div>
+      <div class="g-title">Dimension Didactique</div>
+      <div class="g-subtitle">Rapport aux savoirs disciplinaires et gestion des contenus</div>
+    </div>
+  </div>
+  <div class="grille-body" id="body-2"></div>
+  <div class="grille-footer g2">
+    <div class="score-bar-wrap">
+      <div class="score-bar-label">Progression — <span id="pct-2">0</span>%</div>
+      <div class="score-bar-track"><div class="score-bar-fill" id="bar-2" style="width:0%"></div></div>
+    </div>
+    <div class="score-badge g2"><span id="score-2">0</span><span> / 60</span></div>
+  </div>
+  <div class="legende">
+    <div class="leg-item"><div class="leg-dot" style="background:#e74c3c"></div>0 Absent</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e67e22"></div>1 Insuffisant</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#f1c40f"></div>2 Partiel</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#27ae60"></div>3 Satisfaisant</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#1abc9c"></div>4 Excellent</div>
+  </div>
+</div>
+
+<!-- GRILLE 3 -->
+<div class="panel g3" id="panel-3">
+  <div class="grille-header">
+    <div class="g-num">3</div>
+    <div>
+      <div class="g-title">Dimension Relationnelle</div>
+      <div class="g-subtitle">Interactions enseignant–élèves et climat de la classe</div>
+    </div>
+  </div>
+  <div class="grille-body" id="body-3"></div>
+  <div class="grille-footer g3">
+    <div class="score-bar-wrap">
+      <div class="score-bar-label">Progression — <span id="pct-3">0</span>%</div>
+      <div class="score-bar-track"><div class="score-bar-fill" id="bar-3" style="width:0%"></div></div>
+    </div>
+    <div class="score-badge g3"><span id="score-3">0</span><span> / 60</span></div>
+  </div>
+  <div class="legende">
+    <div class="leg-item"><div class="leg-dot" style="background:#e74c3c"></div>0 Absent</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e67e22"></div>1 Insuffisant</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#f1c40f"></div>2 Partiel</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#27ae60"></div>3 Satisfaisant</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#1abc9c"></div>4 Excellent</div>
+  </div>
+</div>
+
+<!-- GRILLE 4 -->
+<div class="panel g4" id="panel-4">
+  <div class="grille-header">
+    <div class="g-num">4</div>
+    <div>
+      <div class="g-title">Dimension Personnelle</div>
+      <div class="g-subtitle">Posture, gestes professionnels et vécu subjectif de l'enseignant</div>
+    </div>
+  </div>
+  <div class="grille-body" id="body-4"></div>
+  <div class="grille-footer g4">
+    <div class="score-bar-wrap">
+      <div class="score-bar-label">Progression — <span id="pct-4">0</span>%</div>
+      <div class="score-bar-track"><div class="score-bar-fill" id="bar-4" style="width:0%"></div></div>
+    </div>
+    <div class="score-badge g4"><span id="score-4">0</span><span> / 60</span></div>
+  </div>
+  <div class="legende">
+    <div class="leg-item"><div class="leg-dot" style="background:#e74c3c"></div>0 Absent</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e67e22"></div>1 Insuffisant</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#f1c40f"></div>2 Partiel</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#27ae60"></div>3 Satisfaisant</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#1abc9c"></div>4 Excellent</div>
+  </div>
+</div>
+
+<!-- SYNTHESE -->
+<div class="panel" id="panel-synthese">
+  <div class="synthese-grid">
+    <div class="syn-card g1">
+      <h3>① Dimension Pédagogique</h3>
+      <div><span class="syn-score-big" id="syn-score-1">0</span><span class="syn-out-of">/ 68</span></div>
+      <div class="syn-bar-track"><div class="syn-bar-fill" id="syn-bar-1" style="width:0%"></div></div>
+      <div class="syn-fields">
+        <label>Points forts</label>
+        <textarea placeholder="Observations…" id="syn-pf-1"></textarea>
+        <label>Axes de progrès</label>
+        <textarea placeholder="Observations…" id="syn-ap-1"></textarea>
+      </div>
+    </div>
+    <div class="syn-card g2">
+      <h3>② Dimension Didactique</h3>
+      <div><span class="syn-score-big" id="syn-score-2">0</span><span class="syn-out-of">/ 60</span></div>
+      <div class="syn-bar-track"><div class="syn-bar-fill" id="syn-bar-2" style="width:0%"></div></div>
+      <div class="syn-fields">
+        <label>Points forts</label>
+        <textarea placeholder="Observations…" id="syn-pf-2"></textarea>
+        <label>Axes de progrès</label>
+        <textarea placeholder="Observations…" id="syn-ap-2"></textarea>
+      </div>
+    </div>
+    <div class="syn-card g3">
+      <h3>③ Dimension Relationnelle</h3>
+      <div><span class="syn-score-big" id="syn-score-3">0</span><span class="syn-out-of">/ 60</span></div>
+      <div class="syn-bar-track"><div class="syn-bar-fill" id="syn-bar-3" style="width:0%"></div></div>
+      <div class="syn-fields">
+        <label>Points forts</label>
+        <textarea placeholder="Observations…" id="syn-pf-3"></textarea>
+        <label>Axes de progrès</label>
+        <textarea placeholder="Observations…" id="syn-ap-3"></textarea>
+      </div>
+    </div>
+    <div class="syn-card g4">
+      <h3>④ Dimension Personnelle</h3>
+      <div><span class="syn-score-big" id="syn-score-4">0</span><span class="syn-out-of">/ 60</span></div>
+      <div class="syn-bar-track"><div class="syn-bar-fill" id="syn-bar-4" style="width:0%"></div></div>
+      <div class="syn-fields">
+        <label>Points forts</label>
+        <textarea placeholder="Observations…" id="syn-pf-4"></textarea>
+        <label>Axes de progrès</label>
+        <textarea placeholder="Observations…" id="syn-ap-4"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="total-card">
+    <div class="total-label">Score total</div>
+    <div class="total-score" id="total-score">0</div>
+    <div class="total-out">/ 248 points</div>
+    <div class="total-pct" id="total-pct">0%</div>
+  </div>
+</div>
+
+<script>
+// DATA
+const grilles = {
+  1: {
+    max: 68,
+    sections: [
+      { title: "1. Préparation et structuration", items: [
+        { code:"1.1", label:"Les objectifs d'apprentissage sont clairement définis et communiqués aux élèves" },
+        { code:"1.2", label:"La progression de la séance est logique et cohérente" },
+        { code:"1.3", label:"Le matériel et les supports sont préparés et adaptés au niveau" },
+        { code:"1.4", label:"La séance s'inscrit dans la progression de la séquence" },
+      ]},
+      { title: "2. Gestion du temps et du rythme", items: [
+        { code:"2.1", label:"Le temps alloué à chaque phase est respecté" },
+        { code:"2.2", label:"Les transitions entre les activités sont fluides" },
+        { code:"2.3", label:"Le rythme est adapté à l'ensemble du groupe" },
+      ]},
+      { title: "3. Diversification des activités", items: [
+        { code:"3.1", label:"Les modalités de travail sont variées (individuel, binôme, groupe)" },
+        { code:"3.2", label:"Les supports utilisés sont diversifiés et stimulants" },
+        { code:"3.3", label:"Les activités mobilisent différents niveaux cognitifs (mémorisation, compréhension, application, analyse)" },
+      ]},
+      { title: "4. Gestion de la classe", items: [
+        { code:"4.1", label:"Les consignes sont claires, précises et comprises de tous" },
+        { code:"4.2", label:"L'enseignant maintient l'attention et l'engagement des élèves" },
+        { code:"4.3", label:"Les comportements perturbateurs sont gérés avec efficacité" },
+        { code:"4.4", label:"L'espace classe est organisé de façon fonctionnelle" },
+      ]},
+      { title: "5. Évaluation formative", items: [
+        { code:"5.1", label:"L'enseignant vérifie régulièrement la compréhension des élèves" },
+        { code:"5.2", label:"Des moments de bilan ou de synthèse sont ménagés" },
+        { code:"5.3", label:"Les erreurs des élèves sont traitées comme des occasions d'apprentissage" },
+      ]},
+    ]
+  },
+  2: {
+    max: 60,
+    sections: [
+      { title: "1. Maîtrise des contenus", items: [
+        { code:"1.1", label:"L'enseignant maîtrise les notions et concepts abordés" },
+        { code:"1.2", label:"Le vocabulaire disciplinaire est employé avec précision" },
+        { code:"1.3", label:"L'enseignant rectifie les erreurs conceptuelles sans ambiguïté" },
+      ]},
+      { title: "2. Transposition didactique", items: [
+        { code:"2.1", label:"Les savoirs savants sont reformulés de façon accessible" },
+        { code:"2.2", label:"Des analogies, exemples et contre-exemples sont mobilisés" },
+        { code:"2.3", label:"Les représentations initiales des élèves sont repérées et travaillées" },
+        { code:"2.4", label:"L'enseignant fait des liens avec des connaissances déjà acquises" },
+      ]},
+      { title: "3. Progression et construction du savoir", items: [
+        { code:"3.1", label:"La logique de construction des savoirs est visible et explicitée" },
+        { code:"3.2", label:"Les étapes de la démarche (découverte, structuration, entraînement) sont respectées" },
+        { code:"3.3", label:"Le niveau d'abstraction est adapté progressivement" },
+      ]},
+      { title: "4. Gestion des obstacles et des erreurs", items: [
+        { code:"4.1", label:"Les obstacles épistémologiques prévisibles ont été anticipés" },
+        { code:"4.2", label:"Les erreurs des élèves sont analysées dans leur logique" },
+        { code:"4.3", label:"Des remédiations différenciées sont proposées" },
+      ]},
+      { title: "5. Évaluation des apprentissages", items: [
+        { code:"5.1", label:"Les critères d'évaluation sont explicités aux élèves" },
+        { code:"5.2", label:"Des indicateurs de réussite sont définis et communiqués" },
+        { code:"5.3", label:"Le feed-back donné aux élèves est précis et formatif" },
+      ]},
+    ]
+  },
+  3: {
+    max: 60,
+    sections: [
+      { title: "1. Qualité de la communication verbale", items: [
+        { code:"1.1", label:"Le langage est adapté au niveau et à l'âge des élèves" },
+        { code:"1.2", label:"Les explications sont claires, bien articulées et audibles" },
+        { code:"1.3", label:"L'enseignant reformule les propos des élèves pour les valoriser" },
+        { code:"1.4", label:"Les questions posées stimulent la réflexion (questions ouvertes)" },
+      ]},
+      { title: "2. Communication non verbale", items: [
+        { code:"2.1", label:"La posture corporelle exprime la disponibilité et l'engagement" },
+        { code:"2.2", label:"Le regard est distribué équitablement dans la classe" },
+        { code:"2.3", label:"Les déplacements dans la salle sont intentionnels et fonctionnels" },
+      ]},
+      { title: "3. Climat de classe et cadre relationnel", items: [
+        { code:"3.1", label:"Un cadre sécurisant est établi (règles claires, respect mutuel)" },
+        { code:"3.2", label:"L'enseignant valorise les efforts et les réussites" },
+        { code:"3.3", label:"Les erreurs sont traitées sans stigmatisation" },
+        { code:"3.4", label:"La parole est distribuée équitablement entre les élèves" },
+      ]},
+      { title: "4. Gestion des interactions élèves", items: [
+        { code:"4.1", label:"Les interactions entre élèves sont encouragées et régulées" },
+        { code:"4.2", label:"L'enseignant gère les conflits avec calme et équité" },
+        { code:"4.3", label:"Les élèves en difficulté reçoivent une attention particulière" },
+      ]},
+      { title: "5. Différenciation relationnelle", items: [
+        { code:"5.1", label:"L'enseignant adapte son niveau de relation à chaque élève" },
+        { code:"5.2", label:"Les élèves discrets ou inhibés sont sollicités avec bienveillance" },
+        { code:"5.3", label:"La relation est empreinte de chaleur sans excès de familiarité" },
+      ]},
+    ]
+  },
+  4: {
+    max: 60,
+    sections: [
+      { title: "1. Posture professionnelle", items: [
+        { code:"1.1", label:"L'enseignant fait preuve d'assurance et de confiance en soi" },
+        { code:"1.2", label:"La tenue, la présentation et la voix correspondent au cadre professionnel" },
+        { code:"1.3", label:"L'enseignant assume son rôle d'autorité avec sérénité" },
+      ]},
+      { title: "2. Gestes professionnels spécifiques", items: [
+        { code:"2.1", label:"Les gestes d'étayage sont adaptés au besoin de chaque élève" },
+        { code:"2.2", label:"L'enseignant improvise efficacement face aux imprévus" },
+        { code:"2.3", label:"Les gestes d'institutionnalisation marquent clairement les savoirs à retenir" },
+        { code:"2.4", label:"L'enseignant ajuste sa pratique en cours de séance" },
+      ]},
+      { title: "3. Engagement et présence", items: [
+        { code:"3.1", label:"L'enseignant témoigne d'un intérêt sincère pour les apprentissages des élèves" },
+        { code:"3.2", label:"L'enthousiasme et la motivation sont perceptibles" },
+        { code:"3.3", label:"L'enseignant est pleinement présent et attentif à ce qui se passe" },
+      ]},
+      { title: "4. Gestion du stress et des émotions", items: [
+        { code:"4.1", label:"L'enseignant gère les situations difficiles sans perdre son calme" },
+        { code:"4.2", label:"Les émotions sont exprimées de façon professionnelle et maîtrisée" },
+        { code:"4.3", label:"L'enseignant prend du recul face aux comportements perturbateurs" },
+      ]},
+      { title: "5. Réflexivité et auto-évaluation", items: [
+        { code:"5.1", label:"L'enseignant manifeste une capacité à se remettre en question" },
+        { code:"5.2", label:"Il identifie et nomme ses propres hésitations ou ajustements" },
+        { code:"5.3", label:"Une posture d'apprenant sur sa propre pratique est perceptible" },
+        { code:"5.4", label:"L'enseignant sollicite un retour ou accepte le regard de l'observateur" },
+      ]},
+    ]
+  }
+};
+
+const scores = { 1:{}, 2:{}, 3:{}, 4:{} };
+
+function buildGrille(gNum) {
+  const g = grilles[gNum];
+  const body = document.getElementById('body-' + gNum);
+  let html = '';
+  g.sections.forEach(section => {
+    html += `<div class="section-title">${section.title}</div>`;
+    section.items.forEach(item => {
+      const key = `${gNum}-${item.code}`;
+      html += `
+        <div class="indicator-row" id="row-${key}">
+          <div class="ind-label">${item.label}</div>
+          <div class="ind-code">${item.code}</div>
+          <div class="score-select-wrap">
+            ${[0,1,2,3,4].map(v => `<button class="score-btn" data-v="${v}" data-key="${key}" data-g="${gNum}" onclick="setScore('${key}',${v},${gNum})">${v}</button>`).join('')}
+          </div>
+        </div>
+        <div class="remarks-row" id="rem-${key}">
+          <textarea placeholder="Observations / Remarques…" id="txt-${key}"></textarea>
+        </div>`;
+    });
+  });
+  body.innerHTML = html;
+}
+
+function setScore(key, val, gNum) {
+  scores[gNum][key] = val;
+  // Update buttons
+  document.querySelectorAll(`.score-btn[data-key="${key}"]`).forEach(btn => {
+    btn.classList.toggle('sel', parseInt(btn.dataset.v) === val);
+  });
+  // Show remarks
+  const rem = document.getElementById('rem-' + key);
+  rem.classList.add('open');
+  updateScores(gNum);
+}
+
+function updateScores(gNum) {
+  const g = grilles[gNum];
+  let total = 0;
+  Object.values(scores[gNum]).forEach(v => total += v);
+  const max = g.max;
+  const pct = Math.round((total / max) * 100);
+  document.getElementById('score-' + gNum).textContent = total;
+  document.getElementById('pct-' + gNum).textContent = pct;
+  document.getElementById('bar-' + gNum).style.width = pct + '%';
+  // Synthese
+  document.getElementById('syn-score-' + gNum).textContent = total;
+  document.getElementById('syn-bar-' + gNum).style.width = pct + '%';
+  // Total
+  let grand = 0;
+  let grandMax = 0;
+  [1,2,3,4].forEach(g => {
+    grandMax += grilles[g].max;
+    Object.values(scores[g]).forEach(v => grand += v);
+  });
+  document.getElementById('total-score').textContent = grand;
+  document.getElementById('total-pct').textContent = Math.round((grand/grandMax)*100) + '%';
+}
+
+function showTab(gNum) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + gNum).classList.add('active');
+  document.querySelector(`.tab-btn[data-grille="${gNum}"]`).classList.add('active');
+}
+
+function resetAll() {
+  if (!confirm('Réinitialiser toutes les notes ?')) return;
+  [1,2,3,4].forEach(g => {
+    scores[g] = {};
+    document.querySelectorAll(`#body-${g} .score-btn`).forEach(btn => btn.classList.remove('sel'));
+    document.querySelectorAll(`#body-${g} .remarks-row`).forEach(r => { r.classList.remove('open'); });
+    document.querySelectorAll(`#body-${g} textarea`).forEach(t => t.value = '');
+    updateScores(g);
+  });
+}
+
+function updateSyntheseHeader() {}
+
+// Init
+[1,2,3,4].forEach(g => buildGrille(g));
+</script>
+</body>
+</html>
